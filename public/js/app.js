@@ -59137,7 +59137,7 @@ __webpack_require__.r(__webpack_exports__);
       ctx.moveTo(startX, startY);
 
       for (var i = 0; i < vector.length; i++) {
-        barWidth = width * vector[i] / 255;
+        barWidth = width * vector[i];
         ctx.lineTo(startX + factor * barWidth, startY + i * barHeight);
         ctx.lineTo(startX + factor * barWidth, startY + (i + 1) * barHeight);
       }
@@ -59667,7 +59667,8 @@ function () {
       }
 
       canvas.addEventListener('webglcontextlost', this.handleContextLost);
-      var gl = canvas.getContext('webgl', attributes) || canvas.getContext('experimental-webgl', attributes);
+      var gl = canvas.getContext('webgl2', attributes) || canvas.getContext('experimental-webgl', attributes);
+      gl.getExtension("EXT_color_buffer_float");
 
       if (!gl) {
         throw new WebglError('Your browser does not support WebGL.');
@@ -59874,9 +59875,9 @@ function () {
       // target, level of detail, internal format, width,
       // height, border width, source format, texture data type, pixel data
 
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(width * height * 4));
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, width, height, 0, gl.RGBA, gl.FLOAT, new Float32Array(width * height * 4));
       images.forEach(function (image, index) {
-        gl.texSubImage2D(gl.TEXTURE_2D, 0, index % props.colsPerTexture * dataset.width, Math.floor(index / props.colsPerTexture) * dataset.height, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, index % props.colsPerTexture * dataset.width, Math.floor(index / props.colsPerTexture) * dataset.height, gl.RGBA, gl.FLOAT, image);
       });
     }
   }, {
@@ -60362,7 +60363,7 @@ function (_Program) {
     _this.mousePositionPointer = null;
     _this.dataset = dataset;
     _this.framebuffer = null;
-    _this.pixelVector = new Uint8Array(_this.textureDimension * _this.textureDimension * 4);
+    _this.pixelVector = new Float32Array(_this.textureDimension * _this.textureDimension * 4);
     return _this;
   }
 
@@ -60380,7 +60381,7 @@ function (_Program) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
       this.texture = handler.getTexture('pixelVector');
       gl.bindTexture(gl.TEXTURE_2D, this.texture);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.textureDimension, this.textureDimension, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, this.textureDimension, this.textureDimension, 0, gl.RGBA, gl.FLOAT, null);
       gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.texture, 0);
       gl.bindTexture(gl.TEXTURE_2D, null);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -60396,8 +60397,9 @@ function (_Program) {
   }, {
     key: "afterRender",
     value: function afterRender(gl, handler) {
-      gl.readPixels(0, 0, this.textureDimension, this.textureDimension, gl.RGBA, gl.UNSIGNED_BYTE, this.pixelVector);
+      gl.readPixels(0, 0, this.textureDimension, this.textureDimension, gl.RGBA, gl.FLOAT, this.pixelVector);
       gl.viewport(0, 0, this.dataset.width, this.dataset.height);
+      console.log(this.pixelVector);
     }
   }, {
     key: "link",
@@ -60678,7 +60680,6 @@ function (_IntensityProgram) {
 
       gl.uniform1f(this.tilePointer, this.featureTile);
       gl.uniform4f.apply(gl, [this.channelMaskPointer].concat(_toConsumableArray(this.channelMask)));
-      console.log(this.channelMask);
     }
   }, {
     key: "afterRender",

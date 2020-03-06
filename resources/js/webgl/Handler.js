@@ -54,7 +54,8 @@ export default class Handler {
 
         canvas.addEventListener('webglcontextlost', this.handleContextLost);
 
-        let gl = canvas.getContext('webgl', attributes) || canvas.getContext('experimental-webgl', attributes);
+        let gl = canvas.getContext('webgl2', attributes) || canvas.getContext('experimental-webgl', attributes);
+        gl.getExtension("EXT_color_buffer_float");
 
         if (!gl) {
             throw new WebglError('Your browser does not support WebGL.');
@@ -287,7 +288,7 @@ export default class Handler {
         // Allocate needed memory with a blank texture. Parameters are:
         // target, level of detail, internal format, width,
         // height, border width, source format, texture data type, pixel data
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(width * height * 4))
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, width, height, 0, gl.RGBA, gl.FLOAT, new Float32Array(width * height * 4))
 
         images.forEach(function (image, index) {
             gl.texSubImage2D(gl.TEXTURE_2D,
@@ -295,7 +296,7 @@ export default class Handler {
                 (index % props.colsPerTexture) * dataset.width,
                 Math.floor(index / props.colsPerTexture) * dataset.height,
                 gl.RGBA,
-                gl.UNSIGNED_BYTE,
+                gl.FLOAT,
                 image
             );
         });
