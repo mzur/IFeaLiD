@@ -11,7 +11,7 @@ uniform float u_normalization;
 
 out vec4 outColor;
 
-const vec4 ONES = vec4(1);
+const vec4 ONES = vec4(1.0);
 const vec4 ZEROS = vec4(0);
 
 <%=SAMPLER_DEFINITION=%>
@@ -19,14 +19,8 @@ const vec4 ZEROS = vec4(0);
 
 void main() {
     // angle between the two vectors
-    // <A,B> = ||A|| * ||B|| * cos(angle)
-    // => angle = acos(<A,B>/(||A||*||B||))
-    float angle = 0.0;
-
-    // cummulating the squared length of this pixels vector
-    float currentLength = 0.0;
-    // cummulating the squared length of the reference pixels vector
-    float referenceLength = 0.0;
+    // Accumulator for the manhattan distance.
+    vec4 distanceVector;
 
     // temporary texture values of current position
     vec4 current;
@@ -78,25 +72,10 @@ void main() {
             current = convertUvec(texture(<%=SAMPLER=%>, coords_2d_current));
         =%>
 
-        currentLength += dot(current, current);
-        referenceLength += dot(reference, reference);
-        angle += dot(current, reference);
+        distanceVector += abs(current - reference);
     }
 
-    // if the intensities of this fragment are all 0, don't draw it
-    if (currentLength == 0.0) {
-        outColor = ZEROS;
-        return;
-    }
+    float similarity = 1.0 - dot(distanceVector, ONES) * u_normalization;
 
-    angle *= inversesqrt(currentLength * referenceLength);
-
-    // Normalize and clip angle to [0, 1].
-    angle = acos(angle) * u_normalization;
-    angle = min(1.0, max(0.0, angle));
-
-    // Invert angle because a lower angle should signify a higher similarity.
-    angle = 1.0 - angle;
-
-    outColor = vec4(angle);
+    outColor = vec4(similarity);
 }

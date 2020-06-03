@@ -2,20 +2,19 @@ import IntensityProgram from './IntensityProgram';
 import fragmentShaderSource from 'raw-loader!../shaders/similarity.fs';
 import vertexShaderSource from 'raw-loader!../shaders/rectangle.vs';
 
-let MAX_DISTANCE = Math.PI / 2;
-
 export default class Similarity extends IntensityProgram {
     constructor(options) {
         super(vertexShaderSource, fragmentShaderSource, options);
         this.mousePosition = [0.5, 0.5];
         this.mousePositionPointer = null;
+        this.features = options.features;
     }
 
     initialize(gl, handler) {
         super.initialize(gl, handler);
         let pointer = this.getPointer();
         let normalization = gl.getUniformLocation(pointer, 'u_normalization');
-        gl.uniform1f(normalization, 1 / MAX_DISTANCE);
+        gl.uniform1f(normalization, 1 / this.features);
 
         this.mousePositionPointer = gl.getUniformLocation(pointer, 'u_mouse_position');
     }
