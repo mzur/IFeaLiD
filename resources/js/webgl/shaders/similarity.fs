@@ -72,10 +72,10 @@ void main() {
             current = convertUvec(texture(<%=SAMPLER=%>, coords_2d_current));
         =%>
 
-        distanceVector += abs(current - reference);
+        distanceVector += (current - reference) * (current - reference);
     }
 
-    float similarity = 1.0 - dot(distanceVector, ONES) * u_normalization;
+    float similarity = 1.0 - sqrt(dot(distanceVector, ONES)) * u_normalization;
 
     outColor = vec4(similarity);
 }

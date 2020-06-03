@@ -14,7 +14,7 @@ export default class Similarity extends IntensityProgram {
         super.initialize(gl, handler);
         let pointer = this.getPointer();
         let normalization = gl.getUniformLocation(pointer, 'u_normalization');
-        gl.uniform1f(normalization, 1 / this.features);
+        gl.uniform1f(normalization, 1 / Math.sqrt(this.features));
 
         this.mousePositionPointer = gl.getUniformLocation(pointer, 'u_mouse_position');
     }
